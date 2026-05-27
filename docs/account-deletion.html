@@ -1,83 +1,610 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Account Deletion</title>
-    <script>
-        (function () {
-            var params = new URLSearchParams(window.location.search);
-            var appName = (params.get("app") || "").trim() || "Click Counter";
+    <style>
+        :root {
+            color-scheme: light dark;
+            --bg: #0f1115;
+            --panel: rgba(255, 255, 255, 0.04);
+            --panel-border: rgba(255, 255, 255, 0.10);
+            --ink-100: #f3f5f7;
+            --ink-70: #c9cdd4;
+            --ink-50: #8a909a;
+            --danger: #ef4444;
+            --danger-soft: rgba(239, 68, 68, 0.15);
+            --primary: #6366f1;
+            --primary-soft: rgba(99, 102, 241, 0.18);
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
 
-            window.addEventListener("DOMContentLoaded", function () {
-                document.querySelectorAll("[data-app-name]").forEach(function (el) {
-                    el.textContent = appName;
-                });
-                document.title = appName + " — Account Deletion";
-            });
-        })();
-    </script>
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg: #f6f7f9;
+                --panel: rgba(0, 0, 0, 0.025);
+                --panel-border: rgba(0, 0, 0, 0.08);
+                --ink-100: #1a1c20;
+                --ink-70: #4a4f57;
+                --ink-50: #777d86;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--ink-100);
+            line-height: 1.55;
+            padding: 32px 16px 80px;
+        }
+
+        .wrap {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin: 0 0 8px;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: 28px 0 10px;
+        }
+
+        p,
+        li {
+            color: var(--ink-70);
+            font-size: 14.5px;
+        }
+
+        a {
+            color: var(--primary);
+        }
+
+        .panel {
+            margin-top: 22px;
+            padding: 20px;
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+        }
+
+        .panel.danger {
+            background: var(--danger-soft);
+            border-color: rgba(239, 68, 68, 0.30);
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        button,
+        .btn {
+            font: inherit;
+            font-weight: 600;
+            padding: 12px 18px;
+            border-radius: 999px;
+            border: 1px solid var(--panel-border);
+            background: var(--panel);
+            color: var(--ink-100);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        button.danger {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        input {
+            font: inherit;
+            padding: 12px 14px;
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            color: var(--ink-100);
+            width: 100%;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: 2px solid var(--primary-soft);
+            outline-offset: 0;
+        }
+
+        input.invalid {
+            border-color: var(--danger);
+            outline: 2px solid var(--danger-soft);
+        }
+
+        .linkbtn {
+            background: transparent;
+            border: 0;
+            color: var(--primary);
+            padding: 4px 0;
+            font-size: 12.5px;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .linkbtn:hover {
+            text-decoration: underline;
+        }
+
+        .snackbar {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translate(-50%, 24px);
+            max-width: calc(100% - 32px);
+            background: #1f2937;
+            color: #f3f5f7;
+            border: 1px solid var(--panel-border);
+            padding: 12px 18px;
+            border-radius: 999px;
+            font-size: 13.5px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+            z-index: 9999;
+        }
+
+        .snackbar.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        .snackbar.ok {
+            background: var(--success);
+            color: white;
+            border-color: transparent;
+        }
+
+        .snackbar.err {
+            background: var(--danger);
+            color: white;
+            border-color: transparent;
+        }
+
+        .field {
+            margin-bottom: 10px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 12px;
+            color: var(--ink-50);
+            margin-bottom: 6px;
+        }
+
+        .divider {
+            text-align: center;
+            color: var(--ink-50);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 16px 0;
+        }
+
+        .status {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 13.5px;
+        }
+
+        .status.err {
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+
+        .status.ok {
+            background: rgba(16, 185, 129, 0.18);
+            color: var(--success);
+        }
+
+        .status.info {
+            background: var(--primary-soft);
+            color: var(--primary);
+        }
+
+        .who {
+            font-size: 13px;
+            color: var(--ink-50);
+            margin-bottom: 14px;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .small {
+            font-size: 12.5px;
+            color: var(--ink-50);
+        }
+    </style>
 </head>
 
 <body>
-    <h2><strong>Account Deletion</strong></h2>
+    <div class="wrap">
+        <h1 data-app-name>Account Deletion</h1>
+        <p>Delete your <span data-app-name>app</span> account and all associated data.</p>
 
-    <p>This page explains how to delete your <span data-app-name>Click Counter</span> account and the
-        data associated with it. This complies with the Google Play account-deletion
-        requirement.</p>
+        <!-- Sign-in panel ────────────────────────────────────────────── -->
+        <div class="panel" id="signinPanel">
+            <h2>Sign in</h2>
+            <p>Sign in with the account you want to delete.</p>
 
-    <h3><strong>Delete your account from inside the app (recommended)</strong></h3>
+            <div class="row">
+                <button class="primary" id="googleBtn" type="button">
+                    Continue with Google
+                </button>
+            </div>
 
-    <ol>
-        <li>Open <span data-app-name>Click Counter</span> on your device.</li>
-        <li>Go to <strong>Settings</strong> &rarr; <strong>Danger zone</strong> &rarr;
-            <strong>Delete account</strong>.</li>
-        <li>Confirm the action. You will be asked to sign in again with your
-            account (Google or email/password) to prove identity.</li>
-        <li>Once confirmed, your account and data are deleted immediately.</li>
-    </ol>
+            <div class="divider">or use email + password</div>
 
-    <h3><strong>Request deletion by email</strong></h3>
+            <div class="field">
+                <label for="emailInput">Email</label>
+                <input id="emailInput" type="email" autocomplete="email"
+                    placeholder="you@example.com" />
+            </div>
+            <div class="field">
+                <label for="passInput">Password</label>
+                <input id="passInput" type="password" autocomplete="current-password"
+                    placeholder="••••••••" />
+                <button id="forgotBtn" class="linkbtn" type="button">
+                    Forgot password?
+                </button>
+            </div>
+            <div class="row">
+                <button id="emailBtn" type="button">Sign in with email</button>
+            </div>
+            <div id="signinStatus"></div>
+        </div>
 
-    <p>If you can no longer access the app on your device, send an email to
-        <a href="mailto:shiddeshwaran@gmail.com?subject=Account%20Deletion%20Request">shiddeshwaran@gmail.com</a>
-        from the email address associated with your <span data-app-name>Click Counter</span>
-        account. Include the subject line <em>&ldquo;Account Deletion Request&rdquo;</em>.
-        We will verify ownership and delete your account within 7 business days.</p>
+        <!-- Delete panel ─────────────────────────────────────────────── -->
+        <div class="panel danger hidden" id="deletePanel">
+            <h2>Delete account</h2>
+            <p class="who">Signed in as <strong id="whoEmail">—</strong></p>
+            <p><strong>All your data, including backups, will be deleted
+                    permanently. This cannot be undone.</strong></p>
+            <div class="row">
+                <button id="cancelBtn" type="button">Cancel</button>
+                <button class="danger" id="deleteBtn" type="button">
+                    Delete my account
+                </button>
+            </div>
+            <div id="deleteStatus"></div>
+        </div>
 
-    <h3><strong>What gets deleted</strong></h3>
+        <!-- Email fallback ───────────────────────────────────────────── -->
+        <div class="panel">
+            <h2>Can't sign in?</h2>
+            <p>Email <a
+                    href="mailto:shiddeshwaran@gmail.com?subject=Account%20Deletion%20Request">shiddeshwaran@gmail.com</a>
+                from the address tied to your account. We delete within 7 business days.</p>
+        </div>
 
-    <ul>
-        <li>Your Firebase Authentication account (the email/Google identity used to sign in).</li>
-        <li>Your encrypted cloud backup of Android system / secure / global settings.</li>
-        <li>The escrowed encryption key used to decrypt your backups across devices.</li>
-        <li>Your profile metadata (display name and email stored at sign-up).</li>
-        <li>All local snapshots, cached settings, and the encrypted local database on the
-            device when you trigger deletion in-app.</li>
-    </ul>
+        <p class="small" style="margin-top: 28px;">
+            <a href="/?app=Gear%20Sync">← Back to privacy policy</a>
+        </p>
+    </div>
 
-    <h3><strong>What is retained, and for how long</strong></h3>
+    <div id="snackbar" class="snackbar" role="status" aria-live="polite"></div>
 
-    <p>Account deletion is immediate &mdash; once confirmed, the records above are removed
-        from our servers. We do not retain encrypted backups, encryption keys, or profile
-        metadata after deletion.</p>
+    <!-- Firebase Web SDK (modular, v11 CDN) ───────────────────────── -->
+    <script type="module">
+        import { initializeApp } from
+            "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import {
+            getAuth, GoogleAuthProvider, signInWithPopup,
+            signInWithEmailAndPassword, deleteUser, signOut, onAuthStateChanged,
+            sendPasswordResetEmail
+        } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import {
+            getFirestore, doc, deleteDoc
+        } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-    <p>Feedback messages you previously submitted through the in-app
-        &ldquo;Send feedback&rdquo; form are retained without any link to your account
-        for product-improvement purposes. They contain only the message text and
-        anonymous device metadata (app version, Android API level, device model)
-        that you submitted at the time. If you want a specific feedback record
-        removed, mention it in your deletion email.</p>
+        // ── Per-app Firebase config table ──────────────────────────
+        // Public values (apiKey is API-restricted, not a secret). Add
+        // new entries as more apps adopt this page.
+        const CONFIGS = {
+            "Gear Sync": {
+                apiKey: "AIzaSyDi7sRdUjDwWnjQ4CIIjIAaMVl4qIct1No",
+                authDomain: "gear-sync-c56d1.firebaseapp.com",
+                projectId: "gear-sync-c56d1",
+                storageBucket: "gear-sync-c56d1.firebasestorage.app",
+                messagingSenderId: "215957907778",
+                appId: "1:215957907778:web:adf53d56207865e2d1c0db",
+                measurementId: "G-ETK8DS0Y7X"
+            }
+        };
 
-    <p>Diagnostic data collected by Firebase Crashlytics is anonymised and aggregated;
-        it cannot be tied back to your account after deletion.</p>
+        const params = new URLSearchParams(window.location.search);
+        const appName = (params.get("app") || "").trim() || "Gear Sync";
 
-    <h3><strong>Contact</strong></h3>
+        document.querySelectorAll("[data-app-name]").forEach(el => {
+            el.textContent = appName + (el.tagName === "H1" ? " — Account Deletion" : "");
+        });
+        document.title = appName + " — Account Deletion";
 
-    <p>Questions about account deletion:<br />
-        Email:&nbsp;<a href="mailto:shiddeshwaran@gmail.com">shiddeshwaran@gmail.com</a></p>
+        const cfg = CONFIGS[appName];
+        const signinStatus = document.getElementById("signinStatus");
+        const deleteStatus = document.getElementById("deleteStatus");
 
-    <p style="margin-top:32px"><a href="/?app=Gear%20Sync">&larr; Back to privacy policy</a></p>
+        function setStatus(el, msg, kind) {
+            el.innerHTML = "";
+            if (!msg) return;
+            const d = document.createElement("div");
+            d.className = "status " + (kind || "info");
+            d.textContent = msg;
+            el.appendChild(d);
+        }
+
+        const snackbarEl = document.getElementById("snackbar");
+        let snackbarTimer = null;
+        function showSnackbar(msg, kind, durationMs) {
+            if (snackbarTimer) {
+                clearTimeout(snackbarTimer);
+                snackbarTimer = null;
+            }
+            snackbarEl.textContent = msg;
+            snackbarEl.classList.remove("ok", "err");
+            if (kind) snackbarEl.classList.add(kind);
+            snackbarEl.classList.add("show");
+            snackbarTimer = setTimeout(() => {
+                snackbarEl.classList.remove("show");
+                snackbarTimer = null;
+            }, durationMs || 4500);
+        }
+
+        function setInvalid(el, isInvalid) {
+            if (!el) return;
+            el.classList.toggle("invalid", !!isInvalid);
+        }
+
+        function friendlyAuthError(e) {
+            const code = (e && e.code) || "";
+            switch (code) {
+                case "auth/invalid-email":
+                    return "That email address doesn't look right.";
+                case "auth/user-not-found":
+                    return "No account with that email.";
+                case "auth/wrong-password":
+                case "auth/invalid-credential":
+                    return "Wrong email or password.";
+                case "auth/too-many-requests":
+                    return "Too many attempts. Try again later.";
+                case "auth/network-request-failed":
+                    return "Network error. Check your connection.";
+                case "auth/missing-password":
+                    return "Enter your password.";
+                default:
+                    return (e && e.message) || "Sign-in failed.";
+            }
+        }
+
+        if (!cfg) {
+            setStatus(signinStatus,
+                `Web account-deletion is not configured for "${appName}". ` +
+                `Use the email request option below.`, "err");
+            document.getElementById("googleBtn").disabled = true;
+            document.getElementById("emailBtn").disabled = true;
+        }
+
+        // Bail with a friendly message if the config wasn't filled in.
+        if (cfg && (cfg.apiKey.startsWith("REPLACE_") ||
+                    cfg.appId.startsWith("REPLACE_"))) {
+            setStatus(signinStatus,
+                "This page is not yet configured. Use the email request " +
+                "option below to delete your account.", "err");
+            document.getElementById("googleBtn").disabled = true;
+            document.getElementById("emailBtn").disabled = true;
+        }
+
+        let auth, db;
+        if (cfg && !cfg.apiKey.startsWith("REPLACE_")) {
+            const app = initializeApp(cfg);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            onAuthStateChanged(auth, user => {
+                if (user) {
+                    document.getElementById("signinPanel").classList.add("hidden");
+                    document.getElementById("deletePanel").classList.remove("hidden");
+                    document.getElementById("whoEmail").textContent =
+                        user.email || user.uid;
+                    setStatus(deleteStatus, "", "");
+                } else {
+                    document.getElementById("signinPanel").classList.remove("hidden");
+                    document.getElementById("deletePanel").classList.add("hidden");
+                }
+            });
+
+            document.getElementById("googleBtn")
+                .addEventListener("click", async () => {
+                    setStatus(signinStatus, "Opening Google sign-in…", "info");
+                    try {
+                        await signInWithPopup(auth, new GoogleAuthProvider());
+                        setStatus(signinStatus, "", "");
+                    } catch (e) {
+                        const code = (e && e.code) || "";
+                        const cancelled = code === "auth/popup-closed-by-user" ||
+                            code === "auth/cancelled-popup-request";
+                        if (cancelled) {
+                            setStatus(signinStatus, "", "");
+                            return;
+                        }
+                        const msg = friendlyAuthError(e);
+                        setStatus(signinStatus, msg, "err");
+                        showSnackbar(msg, "err");
+                    }
+                });
+
+            const emailInput = document.getElementById("emailInput");
+            const passInput = document.getElementById("passInput");
+
+            // Clear invalid highlight as soon as the user edits the field.
+            emailInput.addEventListener("input", () => setInvalid(emailInput, false));
+            passInput.addEventListener("input", () => setInvalid(passInput, false));
+
+            document.getElementById("emailBtn")
+                .addEventListener("click", async () => {
+                    const email = emailInput.value.trim();
+                    const pass = passInput.value;
+                    setInvalid(emailInput, !email);
+                    setInvalid(passInput, !pass);
+                    if (!email || !pass) {
+                        const msg = "Enter both email and password.";
+                        setStatus(signinStatus, msg, "err");
+                        showSnackbar(msg, "err");
+                        return;
+                    }
+                    setStatus(signinStatus, "Signing in…", "info");
+                    try {
+                        await signInWithEmailAndPassword(auth, email, pass);
+                        setStatus(signinStatus, "", "");
+                    } catch (e) {
+                        const msg = friendlyAuthError(e);
+                        setStatus(signinStatus, msg, "err");
+                        showSnackbar(msg, "err");
+                        // Highlight both fields on credential errors so the
+                        // user sees the failure at the input, not just at the
+                        // status row at the bottom of the panel.
+                        const code = (e && e.code) || "";
+                        const credErr = code === "auth/wrong-password" ||
+                            code === "auth/invalid-credential" ||
+                            code === "auth/user-not-found" ||
+                            code === "auth/invalid-email";
+                        if (credErr) {
+                            setInvalid(emailInput, true);
+                            setInvalid(passInput, true);
+                        }
+                    }
+                });
+
+            document.getElementById("forgotBtn")
+                .addEventListener("click", async () => {
+                    let email = emailInput.value.trim();
+                    if (!email) {
+                        email = (prompt(
+                            "Enter the email address tied to your account:"
+                        ) || "").trim();
+                        if (email) emailInput.value = email;
+                    }
+                    if (!email) {
+                        setInvalid(emailInput, true);
+                        showSnackbar("Enter your email first.", "err");
+                        return;
+                    }
+                    try {
+                        await sendPasswordResetEmail(auth, email);
+                        showSnackbar(
+                            "Check your email for a password-reset link.", "ok",
+                            6000
+                        );
+                    } catch (e) {
+                        showSnackbar(friendlyAuthError(e), "err");
+                    }
+                });
+
+            document.getElementById("cancelBtn")
+                .addEventListener("click", async () => {
+                    try { await signOut(auth); } catch (_) { }
+                });
+
+            document.getElementById("deleteBtn")
+                .addEventListener("click", async () => {
+                    const user = auth.currentUser;
+                    if (!user) return;
+                    if (!confirm(
+                        "Permanently delete this account? This cannot be undone."
+                    )) return;
+
+                    const btn = document.getElementById("deleteBtn");
+                    const cancel = document.getElementById("cancelBtn");
+                    btn.disabled = true;
+                    cancel.disabled = true;
+                    setStatus(deleteStatus, "Deleting account…", "info");
+
+                    const uid = user.uid;
+                    const email = user.email;
+
+                    // Best-effort Firestore wipe. Failures (rules not
+                    // redeployed, missing doc) don't block auth deletion —
+                    // the orphaned docs become unreachable once the auth
+                    // account is gone.
+                    const wipes = [
+                        deleteDoc(doc(db, "cloud_backups", uid)),
+                        deleteDoc(doc(db, "user_keys", uid))
+                    ];
+                    if (email) {
+                        wipes.push(deleteDoc(doc(db, "users", email)));
+                    }
+                    const results = await Promise.allSettled(wipes);
+                    const failed = results
+                        .map((r, i) => r.status === "rejected" ?
+                            ["cloud_backups", "user_keys", "users"][i] : null)
+                        .filter(Boolean);
+
+                    try {
+                        await deleteUser(user);
+                        let msg = "Account deleted.";
+                        if (failed.length) {
+                            msg += " Some Firestore docs could not be removed " +
+                                "(" + failed.join(", ") + ") but the auth account " +
+                                "is gone, so the data is no longer accessible.";
+                        }
+                        setStatus(deleteStatus, msg, "ok");
+                    } catch (e) {
+                        btn.disabled = false;
+                        cancel.disabled = false;
+                        if (e.code === "auth/requires-recent-login") {
+                            setStatus(deleteStatus,
+                                "Please sign out and sign in again, then retry. " +
+                                "Firebase requires a recent login to delete an " +
+                                "account.", "err");
+                        } else {
+                            setStatus(deleteStatus,
+                                "Account deletion failed: " +
+                                (e.message || e.code), "err");
+                        }
+                    }
+                });
+        }
+    </script>
 </body>
 
 </html>
