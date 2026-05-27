@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Account Deletion</title>
+    <script>
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            var appName = (params.get("app") || "").trim() || "Click Counter";
+
+            window.addEventListener("DOMContentLoaded", function () {
+                document.querySelectorAll("[data-app-name]").forEach(function (el) {
+                    el.textContent = appName;
+                });
+                document.title = appName + " — Account Deletion";
+            });
+        })();
+    </script>
+</head>
+
+<body>
+    <h2><strong>Account Deletion</strong></h2>
+
+    <p>This page explains how to delete your <span data-app-name>Click Counter</span> account and the
+        data associated with it. This complies with the Google Play account-deletion
+        requirement.</p>
+
+    <h3><strong>Delete your account from inside the app (recommended)</strong></h3>
+
+    <ol>
+        <li>Open <span data-app-name>Click Counter</span> on your device.</li>
+        <li>Go to <strong>Settings</strong> &rarr; <strong>Danger zone</strong> &rarr;
+            <strong>Delete account</strong>.</li>
+        <li>Confirm the action. You will be asked to sign in again with your
+            account (Google or email/password) to prove identity.</li>
+        <li>Once confirmed, your account and data are deleted immediately.</li>
+    </ol>
+
+    <h3><strong>Request deletion by email</strong></h3>
+
+    <p>If you can no longer access the app on your device, send an email to
+        <a href="mailto:shiddeshwaran@gmail.com?subject=Account%20Deletion%20Request">shiddeshwaran@gmail.com</a>
+        from the email address associated with your <span data-app-name>Click Counter</span>
+        account. Include the subject line <em>&ldquo;Account Deletion Request&rdquo;</em>.
+        We will verify ownership and delete your account within 7 business days.</p>
+
+    <h3><strong>What gets deleted</strong></h3>
+
+    <ul>
+        <li>Your Firebase Authentication account (the email/Google identity used to sign in).</li>
+        <li>Your encrypted cloud backup of Android system / secure / global settings.</li>
+        <li>The escrowed encryption key used to decrypt your backups across devices.</li>
+        <li>Your profile metadata (display name and email stored at sign-up).</li>
+        <li>All local snapshots, cached settings, and the encrypted local database on the
+            device when you trigger deletion in-app.</li>
+    </ul>
+
+    <h3><strong>What is retained, and for how long</strong></h3>
+
+    <p>Account deletion is immediate &mdash; once confirmed, the records above are removed
+        from our servers. We do not retain encrypted backups, encryption keys, or profile
+        metadata after deletion.</p>
+
+    <p>Feedback messages you previously submitted through the in-app
+        &ldquo;Send feedback&rdquo; form are retained without any link to your account
+        for product-improvement purposes. They contain only the message text and
+        anonymous device metadata (app version, Android API level, device model)
+        that you submitted at the time. If you want a specific feedback record
+        removed, mention it in your deletion email.</p>
+
+    <p>Diagnostic data collected by Firebase Crashlytics is anonymised and aggregated;
+        it cannot be tied back to your account after deletion.</p>
+
+    <h3><strong>Contact</strong></h3>
+
+    <p>Questions about account deletion:<br />
+        Email:&nbsp;<a href="mailto:shiddeshwaran@gmail.com">shiddeshwaran@gmail.com</a></p>
+
+    <p style="margin-top:32px"><a href="/?app=Gear%20Sync">&larr; Back to privacy policy</a></p>
+</body>
+
+</html>
